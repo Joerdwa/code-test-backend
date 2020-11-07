@@ -1,5 +1,5 @@
 ﻿using SlothEnterprise.ProductApplication.Applications.Interfaces;
-using SlothEnterprise.ProductApplication.Products;
+using SlothEnterprise.ProductApplication.Products.Interfaces;
 
 namespace SlothEnterprise.ProductApplication.Applications
 {

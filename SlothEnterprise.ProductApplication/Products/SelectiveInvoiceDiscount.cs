@@ -1,4 +1,6 @@
-﻿namespace SlothEnterprise.ProductApplication.Products
+﻿using SlothEnterprise.ProductApplication.Products.Interfaces;
+
+namespace SlothEnterprise.ProductApplication.Products
 {
     public class SelectiveInvoiceDiscount : IProduct
     {
