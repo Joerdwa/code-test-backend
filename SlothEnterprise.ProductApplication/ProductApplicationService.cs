@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Dynamic;
 using SlothEnterprise.External;
 using SlothEnterprise.External.V1;
 using SlothEnterprise.ProductApplication.Applications.Interfaces;
@@ -47,7 +48,7 @@ namespace SlothEnterprise.ProductApplication
                         DirectorName = application.CompanyData.DirectorName
                     }, cid.TotalLedgerNetworth, cid.AdvancePercentage, cid.VatRate);
 
-            return (result.Success) ? result.ApplicationId ?? -1 : -1;
+            return GetSuccessCodeFromApplicationResult(result);
         }
 
         private int SubmitApplicationForBusinessLoans(ISellerApplication application, BusinessLoans loans) {
@@ -62,7 +63,12 @@ namespace SlothEnterprise.ProductApplication
                 InterestRatePerAnnum = loans.InterestRatePerAnnum,
                 LoanAmount = loans.LoanAmount
             });
-            return (result.Success) ? result.ApplicationId ?? -1 : -1;
+
+            return GetSuccessCodeFromApplicationResult(result);
+        }
+
+        private int GetSuccessCodeFromApplicationResult(IApplicationResult applicationResult) {
+            return (applicationResult.Success) ? applicationResult.ApplicationId ?? -1 : -1;
         }
     }
 }
