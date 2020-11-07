@@ -1,9 +1,12 @@
 ﻿using Moq;
+using NSubstitute.ExceptionExtensions;
 using SlothEnterprise.External;
 using SlothEnterprise.External.V1;
 using SlothEnterprise.ProductApplication.Applications;
 using SlothEnterprise.ProductApplication.Products;
+using SlothEnterprise.ProductApplication.Products.Interfaces;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Xunit;
 
@@ -137,10 +140,44 @@ namespace SlothEnterprise.ProductApplication.Tests
             mockBusinessLoansService.VerifyAll();
         }
 
+        [Fact]
+        public void Can_Not_Submit_Application_For_Unsupported_Product()
+        {
+            // Arrange
+
+            var unsupportedProduct = new UnsupportedProduct
+            {
+                Id = 1,
+                LoanAmount = 200,
+            };
+
+            var sellerApplication = new SellerApplication
+            {
+                Product = unsupportedProduct,
+                CompanyData = GetCompanyData(),
+            };
+
+            var sut = new ProductApplicationService(
+                new Mock<ISelectInvoiceService>().Object,
+                new Mock<IConfidentialInvoiceService>().Object,
+                new Mock<IBusinessLoansService>().Object
+            );
+
+            // Act and Assert
+            Assert.Throws<InvalidOperationException>(() => sut.SubmitApplicationFor(sellerApplication));
+        }
+
+
+
         internal class ApplicationResult : IApplicationResult {
             public int? ApplicationId { get; set; }
             public bool Success { get; set; }
             public IList<string> Errors { get; set; }
+        }
+
+        internal class UnsupportedProduct : IProduct {
+            public int Id { get; set; }
+            public decimal LoanAmount { get; set; }
         }
     }
 }
