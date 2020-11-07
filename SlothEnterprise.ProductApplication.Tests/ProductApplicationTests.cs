@@ -1,12 +1,10 @@
 ﻿using Moq;
-using NSubstitute.ExceptionExtensions;
 using SlothEnterprise.External;
 using SlothEnterprise.External.V1;
 using SlothEnterprise.ProductApplication.Applications;
 using SlothEnterprise.ProductApplication.Products;
 using SlothEnterprise.ProductApplication.Products.Interfaces;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Xunit;
 
@@ -166,8 +164,6 @@ namespace SlothEnterprise.ProductApplication.Tests
             // Act and Assert
             Assert.Throws<InvalidOperationException>(() => sut.SubmitApplicationFor(sellerApplication));
         }
-
-
 
         internal class ApplicationResult : IApplicationResult {
             public int? ApplicationId { get; set; }

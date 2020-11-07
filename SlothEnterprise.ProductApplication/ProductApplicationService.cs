@@ -1,7 +1,8 @@
 ﻿using System;
-using SlothEnterprise.External;
 using SlothEnterprise.External.V1;
 using SlothEnterprise.ProductApplication.Applications.Interfaces;
+using SlothEnterprise.ProductApplication.Mappers;
+using SlothEnterprise.ProductApplication.Mappers.Interfaces;
 using SlothEnterprise.ProductApplication.Products;
 
 namespace SlothEnterprise.ProductApplication
@@ -12,11 +13,20 @@ namespace SlothEnterprise.ProductApplication
         private readonly IConfidentialInvoiceService _confidentialInvoiceWebService;
         private readonly IBusinessLoansService _businessLoansService;
 
+        // Mappers
+        private readonly IApplicationResultMapper _applicationResultMapper;
+        private readonly ISellerApplicationMapper _sellerApplicationMapper;
+        private readonly IBusinessLoanMapper _businessLoanMapper;
+
         public ProductApplicationService(ISelectInvoiceService selectInvoiceService, IConfidentialInvoiceService confidentialInvoiceWebService, IBusinessLoansService businessLoansService)
         {
             _selectInvoiceService = selectInvoiceService;
             _confidentialInvoiceWebService = confidentialInvoiceWebService;
             _businessLoansService = businessLoansService;
+
+            _applicationResultMapper = new ApplicationResultMapper();
+            _sellerApplicationMapper = new SellerApplicationMapper();
+            _businessLoanMapper = new BusinessLoanMapper();
         }
 
         public int SubmitApplicationFor(ISellerApplication application)
@@ -39,40 +49,22 @@ namespace SlothEnterprise.ProductApplication
 
         private int SubmitApplicationForConfidentialInvoiceDiscount(ISellerApplication application, ConfidentialInvoiceDiscount cid) {
             var result = _confidentialInvoiceWebService.SubmitApplicationFor(
-                    GetCompanyDataRequestFromSellerApplication(application),
+                    _sellerApplicationMapper.MapToCompanyDataRequest(application),
                     cid.TotalLedgerNetworth,
                     cid.AdvancePercentage,
                     cid.VatRate
             );
 
-            return GetSuccessCodeFromApplicationResult(result);
+            return _applicationResultMapper.MapToResultCode(result);
         }
 
         private int SubmitApplicationForBusinessLoans(ISellerApplication application, BusinessLoans loans) {
             var result = _businessLoansService.SubmitApplicationFor(
-                GetCompanyDataRequestFromSellerApplication(application), 
-                new LoansRequest
-                {
-                    InterestRatePerAnnum = loans.InterestRatePerAnnum,
-                    LoanAmount = loans.LoanAmount
-                }
+                _sellerApplicationMapper.MapToCompanyDataRequest(application),
+                _businessLoanMapper.MapToLoanRequest(loans)
             );
 
-            return GetSuccessCodeFromApplicationResult(result);
-        }
-
-        private CompanyDataRequest GetCompanyDataRequestFromSellerApplication(ISellerApplication application) {
-            return new CompanyDataRequest
-            {
-                CompanyFounded = application.CompanyData.Founded,
-                CompanyNumber = application.CompanyData.Number,
-                CompanyName = application.CompanyData.Name,
-                DirectorName = application.CompanyData.DirectorName
-            };
-        }
-
-        private int GetSuccessCodeFromApplicationResult(IApplicationResult applicationResult) {
-            return (applicationResult.Success) ? applicationResult.ApplicationId ?? -1 : -1;
+            return _applicationResultMapper.MapToResultCode(result);
         }
     }
 }
