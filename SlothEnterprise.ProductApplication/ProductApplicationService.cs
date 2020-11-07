@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Dynamic;
 using SlothEnterprise.External;
 using SlothEnterprise.External.V1;
 using SlothEnterprise.ProductApplication.Applications.Interfaces;
@@ -40,31 +39,36 @@ namespace SlothEnterprise.ProductApplication
 
         private int SubmitApplicationForConfidentialInvoiceDiscount(ISellerApplication application, ConfidentialInvoiceDiscount cid) {
             var result = _confidentialInvoiceWebService.SubmitApplicationFor(
-                    new CompanyDataRequest
-                    {
-                        CompanyFounded = application.CompanyData.Founded,
-                        CompanyNumber = application.CompanyData.Number,
-                        CompanyName = application.CompanyData.Name,
-                        DirectorName = application.CompanyData.DirectorName
-                    }, cid.TotalLedgerNetworth, cid.AdvancePercentage, cid.VatRate);
+                    GetCompanyDataRequestFromSellerApplication(application),
+                    cid.TotalLedgerNetworth,
+                    cid.AdvancePercentage,
+                    cid.VatRate
+            );
 
             return GetSuccessCodeFromApplicationResult(result);
         }
 
         private int SubmitApplicationForBusinessLoans(ISellerApplication application, BusinessLoans loans) {
-            var result = _businessLoansService.SubmitApplicationFor(new CompanyDataRequest
+            var result = _businessLoansService.SubmitApplicationFor(
+                GetCompanyDataRequestFromSellerApplication(application), 
+                new LoansRequest
+                {
+                    InterestRatePerAnnum = loans.InterestRatePerAnnum,
+                    LoanAmount = loans.LoanAmount
+                }
+            );
+
+            return GetSuccessCodeFromApplicationResult(result);
+        }
+
+        private CompanyDataRequest GetCompanyDataRequestFromSellerApplication(ISellerApplication application) {
+            return new CompanyDataRequest
             {
                 CompanyFounded = application.CompanyData.Founded,
                 CompanyNumber = application.CompanyData.Number,
                 CompanyName = application.CompanyData.Name,
                 DirectorName = application.CompanyData.DirectorName
-            }, new LoansRequest
-            {
-                InterestRatePerAnnum = loans.InterestRatePerAnnum,
-                LoanAmount = loans.LoanAmount
-            });
-
-            return GetSuccessCodeFromApplicationResult(result);
+            };
         }
 
         private int GetSuccessCodeFromApplicationResult(IApplicationResult applicationResult) {
