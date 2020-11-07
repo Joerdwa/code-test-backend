@@ -1,14 +1,8 @@
-﻿using SlothEnterprise.ProductApplication.Products;
+﻿using SlothEnterprise.ProductApplication.Applications.Interfaces;
+using SlothEnterprise.ProductApplication.Products;
 
 namespace SlothEnterprise.ProductApplication.Applications
 {
-
-    public interface ISellerApplication
-    {
-        IProduct Product { get; set; }
-        ISellerCompanyData CompanyData { get; set; }
-    }
-
     public class SellerApplication : ISellerApplication
     {
         public IProduct Product { get; set; }
